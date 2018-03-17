@@ -4,15 +4,13 @@ AFRAME.registerComponent('joycon-controls', {
     translationSpeed: {default: 5}
   },
   init: function() {
-    var gamepads = navigator.getGamepads();
-    if (!Array.isArray(gamepads)) {
-      gamepads = Object.keys(gamepads).map(index => gamepads[index]);
-    }
-    this.joyLeft = gamepads.find(pad => pad.id.indexOf('Joy-Con (L)') === 0);
-    this.joyRight = gamepads.find(pad => pad.id.indexOf('Joy-Con (R)') === 0);
-
+    this.setJoycons();
   },
   tick: function(d, dt) {
+    if (!this.joyLeft || !this.joyRight) {
+      this.setJoycons();
+      return;
+    }
     var rotation = this.el.getAttribute('rotation');
     if (this.joyRight.axes[5]) {
       rotation.y -= this.joyRight.axes[5] * this.data.rotationSpeed * dt / 1000;
@@ -31,5 +29,13 @@ AFRAME.registerComponent('joycon-controls', {
     }
 
     this.el.object3D.position.y = 1.5;
+  },
+  setJoycons: function() {
+    var gamepads = navigator.getGamepads();
+    if (!Array.isArray(gamepads)) {
+      gamepads = Object.keys(gamepads).map(index => gamepads[index]);
+    }
+    this.joyLeft = gamepads.find(pad => pad && pad.id && pad.id.indexOf('Joy-Con (L)') === 0);
+    this.joyRight = gamepads.find(pad => pad && pad.id && pad.id.indexOf('Joy-Con (R)') === 0);
   }
 });
